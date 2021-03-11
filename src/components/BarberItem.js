@@ -49,11 +49,11 @@ export default ({data}) => {
 
     const handleClick = () => {
         navigation.navigate('Barber', {
-            id: data.id,
+            id: data.key,
             avatar: data.avatar,
             name: data.name,
             stars: data.stars,
-            photos: data.photos
+            services: data.services
         })
     }
 

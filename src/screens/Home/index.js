@@ -37,7 +37,6 @@ export default () => {
   const [loading, setLoading] = useState(false)
   const [list, setList] = useState([])
   const [refreshing, setRefreshing] = useState(false)
-  const [avat, setAvatar] = useState('')
 
 
   
@@ -63,42 +62,46 @@ export default () => {
   }
 
 
-  const getBarbers = () => {
+
+
+  const getBarbers = async() => {
     setLoading(true);
     setList([]);
 
-    const subscriber = firestore()
+
+    const getAvatar = async (barberId) => {
+      const url = await storage().ref().child('Barbers/'+barberId+'/perfil.jpg').getDownloadURL()
+      return url
+    }
+
+    const subscriber =  firestore()
       .collection('barbers')
       .onSnapshot(querySnapshot => {
-        var barbers = [];
-    
-        querySnapshot.forEach(documentSnapshot => {
-
-          const getAvatar = async() => {
-            
-            const url = await storage().ref().child('Barbers/'+documentSnapshot.id+'/perfil.jpg').getDownloadURL()
-            return url
-          }
-
-          const getPhotos = async () => {
-            const avatar = await getAvatar()
+        const barbers = [];
+        
+        async function getTodos() {
+          for (const doc of querySnapshot.docs) {
+            const url = await getAvatar(doc.id)
             barbers.push({
-              ...documentSnapshot.data(),
-              key: documentSnapshot.id,
-              avatar: avatar
+              ...doc.data(),
+              key: doc.id,
+              avatar: url
             })
-          }
-          
-          getPhotos()
-
-          setTimeout(() => {
             
-            setLoading(false)
-          },1000)
-        })
-        setList(barbers)
+          }
+          console.log(barbers);
+          setList(barbers)
+          setLoading(false)
+          console.log('Finished!');
+        }
+        getTodos()
+
+        //setList(barbers)
+        
+        console.log(10)
 
       });
+      console.log(20)
     return () => subscriber();
     
 
@@ -146,6 +149,7 @@ export default () => {
 
           <ListArea>
             {list.map((item, k)=>(
+              console.log(list),
               <BarberItem key={k} data={item}/>
             ))}
 

@@ -7,25 +7,38 @@ import storage from '@react-native-firebase/storage'
 
 import Stars from '../../components/Stars'
 
+import FavoriteFullIcon from '../../assets/favorite_full.svg' 
 import FavoriteIcon from '../../assets/favorite.svg'
 import BackIcon from '../../assets/back.svg'
 
 import { Container,
   Scroller,
   PageBody,
+  BackButton,
+  LoadingIcon,
+
   UserInfoArea,
-  ServiceArea,
-  TestimonialArea,
-  FakeSwiper,
   UserAvatar,
   UserInfo,
   UserInfoName,
   UserFavButton,
+
   SwipeDot,
   SwipeDotActive,
   SwipeItem,
   SwipeImage,
-  BackButton
+  FakeSwiper,
+
+  ServiceArea,
+  ServicesTitle,
+  ServiceItem,
+  ServiceInfo,
+  ServiceName,
+  ServicePrice,
+  ServiceChooseButton,
+  ServiceChooseBtnText,
+
+  TestimonialArea
 } from './styles';
 
 
@@ -39,52 +52,47 @@ export default () => {
     avatar: route.params.avatar,
     name: route.params.name,
     stars: route.params.stars,
-    photos: [],
-    services: []
+    services: route.params.services
 
   })
+  const [barberPhotos, setBarberPhotos] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [favorite, setFavorite] = useState(false)
 
   useEffect(()=>{
     getBarber()
-  })
+    console.log(userInfo.services)
+  }, [])
 
   const getBarber = () => {
     let photos = []
+    
+    setLoading(true)
 
     const getPhotosServices = async () => {
 
       var storageRef = storage().ref().child('Barbers/'+userInfo.id+'/Services')
-      await storageRef.listAll().then((result)=>{
-        result.items.forEach((imageRef)=>{
-          imageRef.getDownloadURL().then((url)=> {
-            
+      await storageRef.listAll().then(async(result)=>{
+
+        async function getTodos() {
+          for (const photo of result.items) {
+            const url = await photo.getDownloadURL()
             photos.push(url)
-          })
-        })
+            
+          }
+          console.log(photos);
+          setBarberPhotos(photos)
+          console.log('Finished!');
+        }
+        getTodos()
+        
       })
     }
 
-    const getInfoBarber = async() => {
-      const subscriber = firestore()
-        .collection('barbers')
-        .doc(userInfo.id)
-        .onSnapshot(documentSnapshot => {
-          console.log(userInfo.id,userInfo.name)
-          
-      })
-      return () => subscriber();
-    }
-
-    const setInfoBarber = async() => {
-      //await getPhotosServices()
-      await getInfoBarber()
-      
-      //console.log(userInfo.services)
-    }
-    setInfoBarber()
-    //setUserInfo(prevState => {
-    //  return { ...prevState, photos: photos }
-    //});
+    getPhotosServices().then(
+      setLoading(false)
+    )
+    
   }
 
 
@@ -95,7 +103,7 @@ export default () => {
   return (
       <Container>
           <Scroller>
-            {userInfo.photos && userInfo.photos.length > 0 ?
+            {barberPhotos && barberPhotos.length > 0 ?
               <Swiper 
                 style={{height: 240}}
                 dot={<SwipeDot/>}
@@ -103,7 +111,7 @@ export default () => {
                 paginationStyle={{top: 15, right: 15, bottom: null, left: null}}
                 autoplay={true}
               >
-                {userInfo.photos.map((item, key)=>(
+                {barberPhotos.map((item, key)=>(
                   <SwipeItem key={key}>
                     <SwipeImage source={{uri: item}} resizeMode="cover"/>
                   </SwipeItem>
@@ -124,13 +132,38 @@ export default () => {
                     
                 </UserInfo>
                 <UserFavButton>
-                  <FavoriteIcon width="24" height="24" fill="#FF0000"/>
+                  {favorited ?
+                    <FavoriteFullIcon width="24" height="24" fill="#FF0000"/>
+                    :
+                    <FavoriteIcon width="24" height="24" fill="#FF0000"/>
+                  }
+                  
                 </UserFavButton>
 
               </UserInfoArea>
-              <ServiceArea>
 
-              </ServiceArea>
+              {loading &&
+                  <LoadingIcon size="large" color="#000000"/>
+              }
+
+              {userInfo.services &&
+                <ServiceArea>
+                  <ServicesTitle>Lista de serviços</ServicesTitle>
+
+                  {userInfo.services.map((item, key) => (
+                    <ServiceItem key={key}>
+                      <ServiceInfo>
+                        <ServiceName>{item.name}</ServiceName>
+                        <ServicePrice>R$ {item.value}</ServicePrice>
+                      </ServiceInfo>
+                      <ServiceChooseButton>
+                        <ServiceChooseBtnText>Agendar</ServiceChooseBtnText>
+                      </ServiceChooseButton>
+                    </ServiceItem>
+                  ))}
+              
+                </ServiceArea>
+              }
               <TestimonialArea>
                 
               </TestimonialArea>
