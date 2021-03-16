@@ -89,19 +89,12 @@ export default () => {
             })
             
           }
-          console.log(barbers);
           setList(barbers)
           setLoading(false)
-          console.log('Finished!');
         }
         getTodos()
 
-        //setList(barbers)
-        
-        console.log(10)
-
       });
-      console.log(20)
     return () => subscriber();
     
 
@@ -149,7 +142,6 @@ export default () => {
 
           <ListArea>
             {list.map((item, k)=>(
-              console.log(list),
               <BarberItem key={k} data={item}/>
             ))}
 

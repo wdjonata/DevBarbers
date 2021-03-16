@@ -5,7 +5,7 @@ import Swiper from 'react-native-swiper'
 import storage from '@react-native-firebase/storage'
  
 import Stars from '../../components/Stars'
-import BarberModal from '../../components'
+import BarberModal from '../../components/BarberModal'
  
 import FavoriteFullIcon from '../../assets/favorite_full.svg'
 import FavoriteIcon from '../../assets/favorite.svg'
@@ -58,7 +58,7 @@ export default () => {
  const [barberPhotos, setBarberPhotos] = useState({})
  const [loading, setLoading] = useState(false)
  const [favorited, setFavorited] = useState(false)
- const [selectedService, setSelectedService] = useState(false)
+ const [selectedService, setSelectedService] = useState(null)
  const [showModal, setShowModal] = useState(false)
  
  useEffect(()=>{
@@ -82,9 +82,7 @@ export default () => {
            photos.push(url)
           
          }
-         console.log(photos);
          setBarberPhotos(photos)
-         console.log('Finished!');
        }
        getTodos()
       
@@ -162,7 +160,6 @@ export default () => {
                  <ServicesTitle>Lista de serviços</ServicesTitle>
  
                  {userInfo.services.map((item, key) => (
-                   console.log(item.name),
                    <ServiceItem key={key}>
                      <ServiceInfo>
                        <ServiceName>{item.name}</ServiceName>
