@@ -15,7 +15,6 @@ export default () => {
     useEffect(() => {
         firebase.auth().onAuthStateChanged((user)=>{
             if(user) {
-                console.log(user)
                 navigation.navigate('MainTab')
             } else {
                 navigation.navigate('SignIn')
